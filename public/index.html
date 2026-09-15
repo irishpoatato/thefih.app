@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>fih is calling</title>
+<meta name="description" content="fih is calling.">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<meta property="og:title" content="fih is calling">
+<meta property="og:description" content="fih is calling.">
+<meta property="og:type" content="website">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="phone">
+
+  <!-- ─────────── status bar (shared across screens) ─────────── -->
+  <div class="statusbar">
+    <span id="clock" class="sb-time">9:41</span>
+    <span class="sb-icons">
+      <svg class="sb-ico" viewBox="0 0 18 12" aria-hidden="true">
+        <rect x="0"  y="8"   width="3" height="4"   rx="1"/>
+        <rect x="5"  y="5.5" width="3" height="6.5" rx="1"/>
+        <rect x="10" y="3"   width="3" height="9"   rx="1"/>
+        <rect x="15" y="0"   width="3" height="12"  rx="1"/>
+      </svg>
+      <svg class="sb-ico sb-wifi" viewBox="0 0 16 12" aria-hidden="true">
+        <path d="M8 11.2 5.9 8.8a3.2 3.2 0 0 1 4.2 0L8 11.2Z"/>
+        <path d="M3.9 6.6a6.2 6.2 0 0 1 8.2 0l-1.3 1.5a4.2 4.2 0 0 0-5.6 0L3.9 6.6Z"/>
+        <path d="M1.6 4a9.6 9.6 0 0 1 12.8 0l-1.3 1.5a7.6 7.6 0 0 0-10.2 0L1.6 4Z"/>
+      </svg>
+      <svg class="sb-ico sb-batt" viewBox="0 0 27 12" aria-hidden="true">
+        <rect x="0.5" y="0.5" width="22" height="11" rx="3.2" fill="none" stroke="currentColor" stroke-opacity=".38"/>
+        <rect x="2"   y="2"   width="19" height="8"  rx="2"   fill="currentColor"/>
+        <path d="M24.5 4.2v3.6a2.1 2.1 0 0 0 0-3.6Z" fill="currentColor" fill-opacity=".45"/>
+      </svg>
+    </span>
+  </div>
+
+  <!-- ─────────── incoming call ─────────── -->
+  <section id="screen-incoming" class="screen is-active">
+
+    <header class="caller">
+      <h1 id="caller-name" class="caller-name">fih</h1>
+      <p id="caller-sub" class="caller-sub">calling...</p>
+    </header>
+
+    <div class="stage">
+      <img id="art-incoming" class="fih-art" src="assets/fih.png" alt="fih" draggable="false">
+      <p id="flavor" class="flavor"></p>
+    </div>
+
+    <div class="actions">
+      <div class="row-mini">
+        <button id="btn-remind" class="mini" type="button">
+          <span class="mini-ico">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="13.4" r="7.4" fill="none" stroke="currentColor" stroke-width="1.9"/>
+              <path d="M12 9.6v4.1l2.6 1.6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+              <path d="M4.4 4.6a5 5 0 0 1 3.9-2.2M19.6 4.6a5 5 0 0 0-3.9-2.2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="mini-label">Remind Me</span>
+        </button>
+
+        <button id="btn-message" class="mini" type="button">
+          <span class="mini-ico">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3.4c5 0 9 3.3 9 7.4s-4 7.4-9 7.4c-1 0-2-.1-2.9-.4-1.3.9-3 1.6-4.6 1.8.9-.9 1.6-2 1.8-3.1C4.3 15.2 3 13.2 3 10.8c0-4.1 4-7.4 9-7.4Z"/>
+            </svg>
+          </span>
+          <span class="mini-label">Message</span>
+        </button>
+      </div>
+
+      <div class="row-main">
+        <div class="act">
+          <button id="btn-decline" class="circle circle-red" type="button" aria-label="Decline">
+            <svg class="handset down" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.28-.28.68-.37 1.04-.24 1.14.38 2.36.58 3.6.58.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.6 21 3 13.4 3 4c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.24.2 2.46.58 3.6.13.36.04.76-.24 1.04l-2.24 2.16Z"/>
+            </svg>
+          </button>
+          <span class="act-label">Decline</span>
+        </div>
+
+        <div class="act">
+          <button id="btn-accept" class="circle circle-green" type="button" aria-label="Accept">
+            <svg class="handset" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.28-.28.68-.37 1.04-.24 1.14.38 2.36.58 3.6.58.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.6 21 3 13.4 3 4c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.24.2 2.46.58 3.6.13.36.04.76-.24 1.04l-2.24 2.16Z"/>
+            </svg>
+          </button>
+          <span class="act-label">Accept</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── in call ─────────── -->
+  <section id="screen-call" class="screen">
+
+    <header class="caller">
+      <h1 class="caller-name">fih</h1>
+      <p id="timer" class="caller-sub timer">00:00</p>
+    </header>
+
+    <div class="stage">
+      <img id="art-call" class="fih-art" src="assets/fih.png" alt="fih" draggable="false">
+    </div>
+
+    <div class="actions">
+      <div class="grid">
+        <button class="pad" type="button" data-toast="you cannot hide">
+          <span class="pad-ico"><svg viewBox="0 0 24 24"><path d="M12 2.8a3.2 3.2 0 0 1 3.2 3.2v6a3.2 3.2 0 0 1-6.4 0V6A3.2 3.2 0 0 1 12 2.8Z"/><path d="M5.5 11.4a6.5 6.5 0 0 0 13 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 18v3.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="slash" d="M4 3.4 20.4 20.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0"/></svg></span>
+          <span class="pad-label">mute</span>
+        </button>
+
+        <button class="pad" type="button" data-toast="no one is going to pick up">
+          <span class="pad-ico"><svg viewBox="0 0 24 24"><g fill="currentColor"><circle cx="6" cy="5" r="2.1"/><circle cx="12" cy="5" r="2.1"/><circle cx="18" cy="5" r="2.1"/><circle cx="6" cy="11" r="2.1"/><circle cx="12" cy="11" r="2.1"/><circle cx="18" cy="11" r="2.1"/><circle cx="6" cy="17" r="2.1"/><circle cx="12" cy="17" r="2.1"/><circle cx="18" cy="17" r="2.1"/></g></svg></span>
+          <span class="pad-label">keypad</span>
+        </button>
+
+        <button class="pad" type="button" data-toast="now everyone can hear the fih">
+          <span class="pad-ico"><svg viewBox="0 0 24 24"><path d="M11.5 3.6 6.8 7.6H3.4v8.8h3.4l4.7 4v-16.8Z"/><path d="M15.2 8.6a4.6 4.6 0 0 1 0 6.8M18 5.6a8.6 8.6 0 0 1 0 12.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+          <span class="pad-label">speaker</span>
+        </button>
+
+        <button class="pad" type="button" data-toast="there is only one fih">
+          <span class="pad-ico"><svg viewBox="0 0 24 24"><circle cx="9.5" cy="7.6" r="3.6"/><path d="M3 19.4c0-3.2 2.9-5.4 6.5-5.4s6.5 2.2 6.5 5.4" /><path d="M18.5 6.4v6M15.5 9.4h6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></span>
+          <span class="pad-label">add call</span>
+        </button>
+
+        <button class="pad" type="button" data-toast="he does not want to be seen">
+          <span class="pad-ico"><svg viewBox="0 0 24 24"><rect x="2.6" y="6.2" width="13" height="11.6" rx="3.2"/><path d="M17.4 11.2 21.4 8.4v7.2l-4-2.8v-1.6Z"/></svg></span>
+          <span class="pad-label">FaceTime</span>
+        </button>
+
+        <button class="pad" type="button" data-toast="fih is your only contact">
+          <span class="pad-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.8"/><path d="M4.8 20c0-3.6 3.2-6 7.2-6s7.2 2.4 7.2 6"/></svg></span>
+          <span class="pad-label">contacts</span>
+        </button>
+      </div>
+
+      <div class="row-main single">
+        <div class="act">
+          <button id="btn-hangup" class="circle circle-red" type="button" aria-label="End call">
+            <svg class="handset down" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.28-.28.68-.37 1.04-.24 1.14.38 2.36.58 3.6.58.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.6 21 3 13.4 3 4c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.24.2 2.46.58 3.6.13.36.04.76-.24 1.04l-2.24 2.16Z"/>
+            </svg>
+          </button>
+          <span class="act-label">&nbsp;</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── missed call (lock screen notification) ─────────── -->
+  <section id="screen-missed" class="screen">
+    <div class="lock">
+      <p id="lock-date" class="lock-date">Monday, June 9</p>
+      <p id="lock-time" class="lock-time">9:41</p>
+    </div>
+
+    <div class="notif-wrap">
+      <div class="notif">
+        <span class="notif-app">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.28-.28.68-.37 1.04-.24 1.14.38 2.36.58 3.6.58.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.6 21 3 13.4 3 4c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.24.2 2.46.58 3.6.13.36.04.76-.24 1.04l-2.24 2.16Z"/>
+          </svg>
+        </span>
+        <span class="notif-body">
+          <span class="notif-head">
+            <span class="notif-title" id="notif-title">Missed Call</span>
+            <span class="notif-time">now</span>
+          </span>
+          <span class="notif-sub" id="notif-sub">fih</span>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── canned replies (Message) ─────────── -->
+  <div id="replies" class="replies" hidden>
+    <div class="replies-inner">
+      <button class="reply" type="button">fih</button>
+      <button class="reply" type="button">fih?</button>
+      <button class="reply" type="button">can i call you back fih</button>
+      <button class="reply" type="button">Custom…</button>
+      <button id="replies-cancel" class="reply cancel" type="button">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ─────────── call log ─────────── -->
+  <div id="sheet" class="sheet" hidden>
+    <div class="sheet-card">
+      <h2 class="sheet-title">Recents</h2>
+      <dl class="stats">
+        <div><dt>Declined</dt><dd id="s-declines">0</dd></div>
+        <div><dt>Answered</dt><dd id="s-answers">0</dd></div>
+        <div><dt>Longest call</dt><dd id="s-longest">00:00</dd></div>
+        <div><dt>Total with fih</dt><dd id="s-total">00:00</dd></div>
+        <div class="global"><dt>Declined worldwide</dt><dd id="s-global">—</dd></div>
+      </dl>
+      <button id="btn-share" class="sheet-btn" type="button">Copy my fih stats</button>
+      <button id="btn-close-sheet" class="sheet-btn plain" type="button">Done</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <button id="btn-stats" class="call-log" type="button">Call Log</button>
+    <div class="home-indicator" aria-hidden="true"></div>
+  </div>
+
+  <p id="toast" class="toast" hidden></p>
+
+  <!-- ─────────── first-tap catcher (only if the browser blocks audio) ───────────
+       Invisible. Absorbs exactly one tap anywhere on the screen, uses it to
+       start the ringtone, then gets out of the way. It has to swallow the
+       click as well as the pointerdown, or the same tap would fall through to
+       Accept/Decline underneath. -->
+  <div id="tap-catcher" class="tap-catcher" hidden></div>
+
+  <!-- ─────────── lock gate (kept behind USE_LOCK_GATE, currently off) ─────────── -->
+  <div id="gate" class="gate" hidden>
+    <div class="gate-lock">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="4.5" y="10.5" width="15" height="11" rx="3.4"/>
+        <path d="M8 10.5V7.6a4 4 0 0 1 8 0v2.9" fill="none" stroke="currentColor" stroke-width="2"/>
+      </svg>
+    </div>
+    <p id="gate-time" class="gate-time">9:41</p>
+    <p id="gate-date" class="gate-date">Monday, June 9</p>
+    <p class="gate-hint">tap to unlock</p>
+  </div>
+
+</div>
+
+<script src="js/counter.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

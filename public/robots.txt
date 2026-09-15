@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# the artwork is not for scraping
+Disallow: /assets/

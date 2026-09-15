@@ -1,0 +1,486 @@
+/* fih is calling — iOS incoming-call screen, rebuilt to match the reference. */
+
+:root{
+  --bg:#141416;             /* sampled from the reference screenshot */
+  --red:#fc3033;            /* decline */
+  --green:#4fd861;          /* accept */
+  --white:#fff;
+  --dim:rgba(255,255,255,.62);
+  --pad:rgba(255,255,255,.22);   /* in-call button fill */
+
+  --sf: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+        "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  --circle:72px;            /* iOS accept/decline diameter */
+  --statusbar:54px;
+  --footer:56px;
+  --column:430px;   /* controls never spread wider than a phone */
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+
+html,body{height:100%;margin:0;}
+
+body{
+  background:#000;
+  color:var(--white);
+  font-family:var(--sf);
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+  overscroll-behavior:none;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-touch-callout:none;
+  display:flex;
+  justify-content:center;
+}
+
+#phone{
+  position:relative;
+  width:100%;
+  height:100dvh;
+  overflow:hidden;
+  background:var(--bg);
+}
+
+/* controls stay on phone-sized columns even when the screen does not */
+.actions{max-width:var(--column);margin-left:auto;margin-right:auto;}
+
+/* ─── status bar ─────────────────────────────────────────── */
+
+.statusbar{
+  position:absolute;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:var(--column);
+  z-index:20;
+  height:var(--statusbar);
+  padding:max(0px, env(safe-area-inset-top)) 30px 0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  pointer-events:none;
+}
+
+.sb-time{
+  font-size:17px;
+  font-weight:600;
+  letter-spacing:.1px;
+  font-variant-numeric:tabular-nums;
+}
+
+.sb-icons{display:flex;align-items:center;gap:5px;color:var(--white);}
+.sb-ico{height:12px;fill:currentColor;display:block;}
+.sb-ico rect,.sb-ico path{fill:currentColor;}
+.sb-wifi{width:16px;}
+.sb-batt{width:27px;}
+.sb-batt rect[fill="none"]{fill:none;}
+
+/* ─── screens ────────────────────────────────────────────── */
+
+.screen{
+  position:absolute;
+  inset:0;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  padding:calc(var(--statusbar) + env(safe-area-inset-top)) 0
+          calc(var(--footer) + env(safe-area-inset-bottom));
+}
+.screen.is-active{display:flex;}
+
+/* ─── caller header ──────────────────────────────────────── */
+
+.caller{
+  text-align:center;
+  margin-top:clamp(18px, 6vh, 52px);
+  padding:0 24px;
+}
+
+.caller-name{
+  margin:0;
+  font-size:clamp(40px, 12.5vw, 54px);
+  font-weight:400;
+  line-height:1.04;
+  letter-spacing:-.5px;
+}
+
+.caller-sub{
+  margin:5px 0 0;
+  font-size:15px;
+  font-weight:400;
+  color:var(--white);
+  letter-spacing:.1px;
+}
+
+.timer{font-variant-numeric:tabular-nums;letter-spacing:.6px;}
+
+/* ─── the fih ────────────────────────────────────────────── */
+
+.stage{
+  flex:1;
+  min-height:0;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  padding:8px 20px;
+}
+
+.fih-art{
+  width:min(78vw, 300px);
+  max-height:34vh;
+  object-fit:contain;
+  display:block;
+  pointer-events:none;          /* decorative: never a drag or context target */
+  -webkit-user-drag:none;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-touch-callout:none;
+}
+.fih-art[hidden]{display:none;}
+
+.flavor{
+  margin:0;
+  min-height:1.3em;
+  max-width:26ch;
+  text-align:center;
+  font-size:15px;
+  line-height:1.35;
+  color:var(--dim);
+  white-space:pre-line;
+}
+
+/* ─── action area ────────────────────────────────────────── */
+
+.actions{
+  width:100%;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:clamp(10px, 1.8vh, 16px);
+  margin-bottom:clamp(8px, 2.2vh, 18px);
+}
+
+.row-mini{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  justify-items:center;
+}
+
+.mini{
+  appearance:none;border:0;background:none;padding:4px 10px;
+  color:var(--white);font-family:var(--sf);
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;transition:opacity .15s;
+}
+.mini:active{opacity:.5;}
+.mini-ico{height:22px;display:block;}
+.mini-ico svg{height:22px;width:22px;fill:currentColor;display:block;}
+.mini-label{font-size:12.5px;letter-spacing:.1px;}
+
+.row-main{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  justify-items:center;
+}
+.row-main.single{grid-template-columns:1fr;}
+
+.act{display:flex;flex-direction:column;align-items:center;gap:10px;}
+
+.circle{
+  appearance:none;border:0;padding:0;
+  width:var(--circle);height:var(--circle);
+  border-radius:50%;
+  display:grid;place-items:center;
+  cursor:pointer;
+  transition:transform .12s ease, filter .12s ease;
+}
+.circle:active{transform:scale(.92);filter:brightness(.85);}
+.circle-red{background:var(--red);}
+.circle-green{background:var(--green);}
+
+.handset{width:34px;height:34px;fill:#fff;display:block;}
+.handset.down{transform:rotate(135deg);}
+
+.act-label{font-size:13px;color:var(--white);letter-spacing:.1px;}
+
+/* the decline button loses its nerve (mouse only) */
+#btn-decline{will-change:transform;}
+#btn-decline.slippery{transition:transform .13s ease-out;}
+#btn-decline.slippery:active{transition:transform .12s ease;}
+
+/* ─── in-call keypad grid ────────────────────────────────── */
+
+.grid{
+  width:75%;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:clamp(12px,3.2vh,22px) 0;
+  justify-items:center;
+}
+
+.pad{
+  appearance:none;border:0;background:none;padding:0;
+  color:var(--white);font-family:var(--sf);
+  display:flex;flex-direction:column;align-items:center;gap:7px;
+  cursor:pointer;
+}
+.pad-ico{
+  width:66px;height:66px;border-radius:50%;
+  background:var(--pad);
+  display:grid;place-items:center;
+  transition:background .15s;
+}
+.pad:active .pad-ico{background:rgba(255,255,255,.4);}
+.pad-ico svg{width:28px;height:28px;fill:currentColor;display:block;}
+.pad-label{font-size:12.5px;}
+
+/* ─── missed call / lock screen ──────────────────────────── */
+
+#screen-missed{justify-content:flex-start;}
+
+.lock{text-align:center;margin-top:clamp(10px,4vh,34px);}
+.lock-date{margin:0;font-size:19px;font-weight:500;color:var(--white);}
+.lock-time{margin:0;font-size:78px;font-weight:300;line-height:1.05;letter-spacing:-1px;font-variant-numeric:tabular-nums;}
+
+.notif-wrap{width:100%;max-width:var(--column);padding:0 14px;
+  margin:auto auto 22vh;}
+
+@keyframes slidein{from{opacity:0;transform:translateY(14px) scale(.97);}to{opacity:1;transform:none;}}
+
+/* The toast is centred by a transform, so its animation has to preserve that
+   transform on every keyframe or it drifts right for the duration. */
+@keyframes toastin{
+  from{opacity:0;transform:translateX(-50%) translateY(14px) scale(.97);}
+  to  {opacity:1;transform:translateX(-50%) translateY(0)    scale(1);}
+}
+
+.notif{
+  display:flex;gap:10px;align-items:flex-start;
+  background:rgba(58,58,60,.72);
+  backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);
+  border-radius:20px;
+  padding:12px 14px;
+  animation:slidein .3s cubic-bezier(.22,1,.36,1);
+}
+.notif-app{
+  flex:none;width:38px;height:38px;border-radius:9px;
+  background:var(--green);
+  display:grid;place-items:center;
+}
+.notif-app svg{width:22px;height:22px;fill:#fff;}
+.notif-body{flex:1;min-width:0;}
+.notif-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+.notif-title{font-size:15px;font-weight:600;}
+.notif-time{font-size:13px;color:rgba(255,255,255,.6);flex:none;}
+.notif-sub{display:block;font-size:15px;color:rgba(255,255,255,.92);margin-top:1px;}
+
+/* ─── canned replies ─────────────────────────────────────── */
+
+.replies{position:absolute;inset:0;z-index:30;display:flex;align-items:flex-end;
+  background:rgba(0,0,0,.45);padding:14px;}
+.replies[hidden]{display:none;}
+.replies-inner{width:100%;max-width:var(--column);margin:0 auto;
+  display:flex;flex-direction:column;gap:9px;}
+.reply{
+  appearance:none;border:0;width:100%;
+  padding:16px;border-radius:15px;
+  background:rgba(70,70,74,.9);
+  backdrop-filter:blur(20px);
+  color:#fff;font-family:var(--sf);font-size:17px;cursor:pointer;
+}
+.reply:active{background:rgba(90,90,95,.95);}
+.reply.cancel{font-weight:600;background:rgba(40,40,44,.95);margin-top:5px;}
+
+/* ─── call log sheet ─────────────────────────────────────── */
+
+.sheet{
+  position:absolute;inset:0;z-index:40;
+  background:rgba(0,0,0,.6);
+  backdrop-filter:blur(10px);
+  display:grid;place-items:center;padding:22px;
+}
+.sheet[hidden]{display:none;}
+
+.sheet-card{
+  width:100%;max-width:340px;
+  background:rgba(44,44,46,.96);
+  border-radius:20px;
+  padding:22px 20px 16px;
+}
+.sheet-title{margin:0 0 16px;font-size:20px;font-weight:600;text-align:center;}
+
+.stats{margin:0 0 18px;display:grid;gap:0;}
+.stats > div{
+  display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+  padding:11px 0;
+  border-bottom:.5px solid rgba(255,255,255,.16);
+}
+.stats > div:last-child{border-bottom:0;}
+.stats dt{color:rgba(255,255,255,.66);font-size:15px;}
+.stats dd{margin:0;font-size:17px;font-variant-numeric:tabular-nums;}
+.stats .global dd{color:var(--green);}
+
+.sheet-btn{
+  display:block;width:100%;margin:8px 0 0;padding:13px;
+  background:rgba(255,255,255,.14);border:0;border-radius:13px;
+  color:#fff;font-family:var(--sf);font-size:16px;cursor:pointer;
+}
+.sheet-btn:active{background:rgba(255,255,255,.24);}
+.sheet-btn.plain{background:none;color:var(--green);font-weight:600;}
+
+/* ─── footer: call log + home indicator ──────────────────── */
+
+.footer{
+  position:absolute;
+  left:0;right:0;
+  bottom:0;
+  height:calc(var(--footer) + env(safe-area-inset-bottom));
+  justify-content:flex-end;
+  z-index:15;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  padding:0 0 max(8px, env(safe-area-inset-bottom));
+  pointer-events:none;
+}
+
+.call-log{
+  pointer-events:auto;
+  appearance:none;
+  border:0;
+  background:none;
+  padding:6px 14px;
+  font-family:var(--sf);
+  font-size:13px;
+  letter-spacing:.2px;
+  color:rgba(255,255,255,.46);   /* WCAG AA on #141416: 4.67:1 (.42 was 4.1) */
+  cursor:pointer;
+  transition:color .15s;
+}
+.call-log:active{color:rgba(255,255,255,.8);}
+
+.home-indicator{
+  width:140px;height:5px;border-radius:3px;
+  background:rgba(255,255,255,.32);
+}
+
+/* ─── toast ──────────────────────────────────────────────── */
+
+.toast{
+  position:absolute;
+  left:50%;
+  bottom:calc(env(safe-area-inset-bottom) + 92px);
+  transform:translateX(-50%);
+  z-index:35;
+  margin:0;
+  padding:10px 16px;
+  border-radius:999px;
+  background:rgba(58,58,60,.86);
+  backdrop-filter:blur(18px);
+  font-size:14px;
+  color:#fff;
+  white-space:nowrap;
+  animation:toastin .22s ease;
+  pointer-events:none;
+}
+.toast[hidden]{display:none;}
+
+/* ─── first-tap catcher ──────────────────────────────────────
+   Fully transparent, but still hit-tests, so it collects the one gesture the
+   browser needs before it will make a sound. Sits above the call screen and
+   below the lock gate. */
+
+.tap-catcher{
+  position:absolute;
+  inset:0;
+  z-index:55;
+  background:transparent;
+}
+.tap-catcher[hidden]{display:none;}
+
+/* ─── lock gate (shown only if the browser blocks audio) ─── */
+
+.gate{
+  position:absolute;inset:0;z-index:60;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;
+  padding-top:calc(var(--statusbar) + 4vh);
+  cursor:pointer;
+}
+.gate[hidden]{display:none;}
+.gate-lock{margin-bottom:16px;opacity:.9;}
+.gate-lock svg{width:26px;height:26px;fill:currentColor;}
+.gate-lock rect{fill:currentColor;}
+.gate-lock path{stroke:currentColor;fill:none;}
+.gate-time{margin:0;font-size:80px;font-weight:300;line-height:1;letter-spacing:-1.5px;font-variant-numeric:tabular-nums;}
+.gate-date{margin:8px 0 0;font-size:19px;font-weight:500;}
+
+@keyframes breathe{0%,100%{opacity:.35;}50%{opacity:.85;}}
+.gate-hint{
+  margin-top:auto;
+  margin-bottom:calc(env(safe-area-inset-bottom) + 46px);
+  font-size:14px;
+  color:rgba(255,255,255,.7);
+  animation:breathe 2.4s ease-in-out infinite;
+}
+
+/* ─── short screens ──────────────────────────────────────── */
+
+@media (max-height:680px){
+  :root{--circle:64px;--footer:48px;}
+  .caller-name{font-size:clamp(34px,10vw,42px);}
+  .fih-art{max-height:26vh;}
+  .pad-ico{width:58px;height:58px;}
+  .lock-time{font-size:60px;}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .gate-hint,.notif,.toast{animation:none;}
+}
+
+/* ─── short windows (landscape phones, small desktop windows) ─────── */
+
+@media (max-height:560px){
+  :root{--circle:56px;--footer:48px;--statusbar:42px;}
+  .call-log{font-size:12px;padding:3px 12px;}
+  .footer{gap:5px;}
+  .home-indicator{width:110px;}
+  .caller{margin-top:4px;}
+  .caller-name{font-size:clamp(26px,6.4vh,36px);}
+  .caller-sub{font-size:13px;margin-top:3px;}
+  .stage{gap:8px;padding:4px 20px;}
+  .fih-art{max-height:24vh;}
+  .actions{gap:8px;margin-bottom:6px;}
+  .mini-ico,.mini-ico svg{height:19px;width:19px;}
+  .mini-label,.pad-label,.act-label{font-size:11.5px;}
+  .handset{width:27px;height:27px;}
+  .pad-ico{width:46px;height:46px;}
+  .pad-ico svg{width:21px;height:21px;}
+  .act{gap:6px;}
+  .pad{gap:5px;}
+  .grid{gap:8px 0;}
+  .lock-time{font-size:46px;}
+  .lock-date{font-size:15px;}
+  .notif-wrap{margin-bottom:8vh;}
+  .flavor{font-size:13px;}
+}
+
+@media (max-height:420px){
+  :root{--circle:48px;--footer:44px;}
+  .fih-art{max-height:20vh;}
+  .caller-name{font-size:24px;}
+  .pad-ico{width:38px;height:38px;}
+  .pad-ico svg{width:18px;height:18px;}
+  .flavor{display:none;}
+}

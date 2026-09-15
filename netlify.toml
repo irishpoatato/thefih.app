@@ -1,0 +1,5 @@
+# Only `public/` is published. README.md, docs/, dev/ and .claude/ stay out of
+# the deploy — dev/fih.png is a third party's screenshot and the docs are
+# written for the maintainer, not the public.
+[build]
+  publish = "public"
