@@ -42,6 +42,18 @@ headers live in `vercel.json` or they do not exist.
 **Do not set `Strict-Transport-Security` in `vercel.json` either.** Vercel
 already sends `max-age=63072000`; anything we set would override it downward.
 
+**Do not put comments in `vercel.json`.** JSON has none, and Vercel validates
+the file with `additionalProperties: false` — a `"_comment": ...` key makes the
+whole config invalid, the build fails, and **production silently keeps serving
+the last good deploy**. That failure mode is quiet: the site stays up, looking
+exactly as it did, while your changes never appear. If a deploy seems to do
+nothing, validate the config first:
+
+```bash
+curl -sS https://openapi.vercel.sh/vercel.json -o schema.json
+python -c "import json,jsonschema;jsonschema.Draft7Validator(json.load(open('schema.json'))).validate(json.load(open('vercel.json')));print('valid')"
+```
+
 If you ever move host: Cloudflare Pages and Netlify both read a `public/_headers`
 file (recreate it from the `vercel.json` values), Cloudflare additionally needs
 **Rocket Loader off** because it injects an inline script that `script-src 'self'`

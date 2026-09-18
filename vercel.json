@@ -1,8 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
 
-  "_comment_hsts": "No Strict-Transport-Security here on purpose: Vercel already sends max-age=63072000, and setting our own would downgrade it. .app is also HSTS-preloaded at the browser level.",
-
   "outputDirectory": "public",
 
   "headers": [
