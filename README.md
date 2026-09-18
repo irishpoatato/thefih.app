@@ -22,18 +22,31 @@ Then visit http://localhost:8000
 
 ## deploy
 
-**Netlify** — `netlify.toml` already sets `publish = "public"`. Connect the repo
-and it is correct by default.
+**Vercel (current host)** — `vercel.json` sets `outputDirectory` and all the
+security headers. ⚠️ **Vercel does not read `_headers`** — that file is
+Netlify/Cloudflare syntax only. Headers must live in `vercel.json` or they are
+simply not applied.
 
-**Cloudflare Pages** — set the build output directory to `public`. It reads the
-same `public/_headers` file, same syntax. Two Cloudflare-specific gotchas:
-turn **Rocket Loader off** (it injects an inline script that `script-src 'self'`
-blocks, breaking all three scripts), and set HSTS in the dashboard rather than
-in both places.
+Live at **https://thefih.app**, from the `thefih.app` repo, via the Vercel
+project `thefihapp`.
 
-**GitHub Pages — don't.** It supports no custom response headers at all, and
-`frame-ancestors` is ignored in `<meta>` form, so the clickjacking protection
-below is undeliverable there.
+`vercel.json` at the repo root carries `outputDirectory` and every security
+header. Vercel zero-config already serves `public/` as the web root, so the
+two agree.
+
+**Do not put headers in a `_headers` file.** That is Netlify / Cloudflare Pages
+syntax and **Vercel ignores it completely** — the site ran with no CSP and no
+frame protection for its first weeks because of exactly that mistake. On Vercel,
+headers live in `vercel.json` or they do not exist.
+
+**Do not set `Strict-Transport-Security` in `vercel.json` either.** Vercel
+already sends `max-age=63072000`; anything we set would override it downward.
+
+If you ever move host: Cloudflare Pages and Netlify both read a `public/_headers`
+file (recreate it from the `vercel.json` values), Cloudflare additionally needs
+**Rocket Loader off** because it injects an inline script that `script-src 'self'`
+blocks. **Not GitHub Pages** — it supports no custom headers at all, and
+`frame-ancestors` is ignored in `<meta>` form.
 
 ### security headers
 
@@ -70,10 +83,9 @@ public/                   <- the ONLY thing that gets deployed
   js/counter.js           every persistent number, behind one swappable interface
   assets/fih.png          the fih, cut out of the reference screenshot
   assets/call_sound.mp3   the ringtone
-  _headers                CSP + security headers (Netlify AND Cloudflare Pages)
   robots.txt
 
-netlify.toml              publishes public/ only
+vercel.json               output dir + security headers (the live config)
 docs/assets.md            asset notes (not deployed)
 dev/fih.png               the original meme screenshot (reference only, not deployed)
 README.md                 this file (not deployed)
@@ -197,6 +209,33 @@ what a phone sees:
 ```
 http://localhost:8000/?blocked=1
 ```
+
+## analytics
+
+Vercel Web Analytics, added as a single deferred same-origin script tag in
+`public/index.html`. **This is the only telemetry on the site**, and it changes
+what the site can honestly claim:
+
+- Before: nothing left the browser, ever.
+- Now: each page view sends timestamp, URL, referrer, filtered query params,
+  coarse geolocation (country/region/city), OS, browser and device type to
+  Vercel.
+
+It uses **no cookies**. Visitors are identified by a hash of the incoming
+request which is discarded after 24 hours, and Vercel does not retain anything
+that can re-identify an individual. On that basis it is still consent-exempt —
+**no cookie banner and no privacy policy are required** — by the same reasoning
+that covered the localStorage counters. Revisit that if custom events are ever
+added, since those can carry whatever you put in them.
+
+Vercel's own snippet includes an inline `window.va` queue shim. It is
+deliberately **omitted**: it exists only to buffer custom events, which this
+site does not use, and including it would force `'unsafe-inline'` into
+`script-src` — a bad trade for a feature we do not want. Page views track fine
+without it.
+
+The script 404s during local development, which is expected and harmless; the
+site is unaffected.
 
 ## the global counter
 
