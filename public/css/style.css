@@ -550,3 +550,38 @@ body{
 @media (hover: none) and (pointer: coarse) and (max-height: 560px) {
   .caller{ margin-top:12px; }
 }
+
+/* ─── rare fih ───────────────────────────────────────────────────────
+   Every variant is the same single fih.png put through a filter or a
+   transform. No new artwork, nothing extra to download, and the rarest ones
+   are still just CSS. Weights live in app.js. */
+
+.fih-art{
+  transition:filter .25s ease, transform .25s ease, opacity .25s ease;
+}
+
+.v-hif     { transform:scaleX(-1); }                /* facing the wrong way */
+.v-big     { transform:scale(1.14); }
+.v-smol    { transform:scale(.56); }
+.v-old     { filter:sepia(.75) saturate(.5) contrast(.95) brightness(.95); }
+.v-shout   { filter:contrast(1.9) brightness(1.25) saturate(1.3); }
+.v-blue    { filter:hue-rotate(165deg) saturate(1.5); }
+.v-unknown { filter:grayscale(1) blur(4px) brightness(.8); }
+.v-ghost   { opacity:.26; filter:brightness(1.5) blur(.6px); }
+.v-gold    { filter:sepia(1) saturate(5) hue-rotate(-12deg) brightness(1.08); }
+
+/* personal best, sat under the in-call timer. Static for the whole call --
+   it is written before the screen is shown and never changes while you are on
+   the line, so the call stays as silent and motionless as intended. */
+.call-best{
+  margin:6px 0 0;
+  font-size:13px;
+  letter-spacing:.2px;
+  color:var(--dim);
+  font-variant-numeric:tabular-nums;
+}
+.call-best[hidden]{display:none;}
+
+@media (prefers-reduced-motion:reduce){
+  .fih-art{transition:none;}
+}

@@ -56,6 +56,29 @@
     try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { /* private mode, whatever */ }
   }
 
+
+  /* ── which fih you have met ───────────────────────────────────────
+     Stored apart from the counters above: sane() coerces every value there to
+     a bounded integer, which would destroy a list of ids. */
+
+  var SEEN_KEY = 'fih.seen.v1';
+
+  function readSeen() {
+    try {
+      var raw = localStorage.getItem(SEEN_KEY);
+      if (!raw) return [];
+      var parsed = JSON.parse(raw);
+      if (!parsed || Object.prototype.toString.call(parsed) !== '[object Array]') return [];
+      var out = [];
+      for (var i = 0; i < parsed.length && out.length < 100; i++) {
+        if (typeof parsed[i] === 'string' && parsed[i].length < 40 && out.indexOf(parsed[i]) === -1) {
+          out.push(parsed[i]);
+        }
+      }
+      return out;
+    } catch (e) { return []; }
+  }
+
   var LocalStore = {
     bump: function (event, amount) {
       if (KEYS.indexOf(event) === -1) return Promise.resolve();
@@ -75,6 +98,18 @@
       // no backend yet. the UI renders an em-dash for null.
       return Promise.resolve(null);
     },
+
+    /* record meeting a variant; resolves true the first time one is seen */
+    markSeen: function (id) {
+      if (typeof id !== 'string' || !id || id.length > 40) return Promise.resolve(false);
+      var seen = readSeen();
+      if (seen.indexOf(id) !== -1) return Promise.resolve(false);
+      seen.push(id);
+      try { localStorage.setItem(SEEN_KEY, JSON.stringify(seen)); } catch (e) {}
+      return Promise.resolve(true);
+    },
+
+    seen: function () { return Promise.resolve(readSeen()); },
 
     best: function (key, value) {
       if (KEYS.indexOf(key) === -1) return Promise.resolve();

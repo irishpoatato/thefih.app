@@ -249,6 +249,45 @@ without it.
 The script 404s during local development, which is expected and harmless; the
 site is unaffected.
 
+## rare fih (prototype)
+
+Every incoming call rolls a variant. All of them are the same `fih.png` under a
+CSS filter or transform -- no extra artwork, nothing more to download.
+
+| variant | look | odds |
+|---|---|---|
+| fih | plain | 87.7% |
+| hif | mirrored | ~1 in 29 |
+| big fih / smol fih | scaled | ~1 in 40 each |
+| old fih | sepia, desaturated | ~1 in 67 |
+| FIH | blown-out contrast | ~1 in 100 |
+| blue fih | hue-rotated | ~1 in 201 |
+| fih (unknown number) | greyscale, blurred | ~1 in 251 |
+| fih? | nearly transparent | ~1 in 334 |
+| gold fih | sepia + saturated | ~1 in 1003 |
+
+Meeting one for the first time replaces the escalation line with "you have not
+seen this fih before", and the Recents sheet counts how many you have met. Only
+calls that actually ring count -- the screen painted behind the entry splash
+does not.
+
+`big fih` is capped at 1.14x deliberately: at 1.3x it runs off the side of a
+375px screen. Verified at 333px wide inside a 375px viewport, unclipped.
+
+**Load `?fih=<id>` to force one** -- `?fih=gold`, `?fih=hif`, and so on. Rolling
+a thousand calls to check a filter is nobody's idea of an evening.
+
+## longest call
+
+The in-call screen stays silent and motionless by design, so the challenge sits
+around it rather than inside it: the record to beat is written under the timer
+*before* the screen appears and never changes while the call runs, and beating
+it is announced on the call-ended notification instead of mid-call.
+
+`state.bestSec` is cached at startup so that line can be written synchronously.
+Reading it async would make text appear a tick into the call, which is exactly
+the thing the silent-call decision rules out.
+
 ## the global counter
 
 `js/counter.js` is currently `LocalStore` — `localStorage`, single browser. It

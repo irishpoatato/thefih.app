@@ -114,8 +114,9 @@
   <section id="screen-call" class="screen">
 
     <header class="caller">
-      <h1 class="caller-name">fih</h1>
+      <h1 id="call-name" class="caller-name">fih</h1>
       <p id="timer" class="caller-sub timer">00:00</p>
+      <p id="best" class="call-best" hidden></p>
     </header>
 
     <div class="stage">
@@ -213,6 +214,7 @@
         <div><dt>Answered</dt><dd id="s-answers">0</dd></div>
         <div><dt>Longest call</dt><dd id="s-longest">00:00</dd></div>
         <div><dt>Total with fih</dt><dd id="s-total">00:00</dd></div>
+        <div><dt>fih met</dt><dd id="s-seen">0 / 10</dd></div>
         <div class="global"><dt>Declined worldwide</dt><dd id="s-global">—</dd></div>
       </dl>
       <button id="btn-share" class="sheet-btn" type="button">Copy my fih stats</button>
