@@ -570,18 +570,6 @@ body{
 .v-ghost   { opacity:.26; filter:brightness(1.5) blur(.6px); }
 .v-gold    { filter:sepia(1) saturate(5) hue-rotate(-12deg) brightness(1.08); }
 
-/* personal best, sat under the in-call timer. Static for the whole call --
-   it is written before the screen is shown and never changes while you are on
-   the line, so the call stays as silent and motionless as intended. */
-.call-best{
-  margin:6px 0 0;
-  font-size:13px;
-  letter-spacing:.2px;
-  color:var(--dim);
-  font-variant-numeric:tabular-nums;
-}
-.call-best[hidden]{display:none;}
-
 @media (prefers-reduced-motion:reduce){
   .fih-art{transition:none;}
 }

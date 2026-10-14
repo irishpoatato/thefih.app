@@ -36,7 +36,6 @@
     hangup:     $('btn-hangup'),
 
     timer:      $('timer'),
-    best:       $('best'),
     callName:   $('call-name'),
 
     replies:    $('replies'),
@@ -219,15 +218,9 @@
 
     el.flavor.textContent = d < FLAVOR.length ? FLAVOR[d] : pick(LATE_FLAVOR);
 
-    // meeting one for the first time earns its own line, in place of the
-    // escalation copy -- otherwise a rare slides past unremarked
-    if (announce && v.id !== 'fih') {
-      window.FihCounter.markSeen(v.id).then(function (isNew) {
-        if (isNew && state.variant === v) {
-          el.flavor.textContent = 'you have not seen this fih before';
-        }
-      });
-    }
+    // meeting one is recorded for the Recents count, but never announced --
+    // the flavor line stays in its normal rotation
+    if (announce && v.id !== 'fih') window.FihCounter.markSeen(v.id);
 
     if (d >= 6) makeSlippery();
   }
@@ -339,17 +332,6 @@
 
     if (state.variant) el.callName.textContent = state.variant.name;
 
-    /* The record to beat, written BEFORE the screen is shown and never touched
-       again while the call runs. The call stays as silent and motionless as
-       it was -- nothing appears partway through, which is why this is a cached
-       value rather than an async read. */
-    if (state.bestSec > 0) {
-      el.best.textContent = 'longest so far ' + clock(state.bestSec);
-      el.best.hidden = false;
-    } else {
-      el.best.hidden = true;
-    }
-
     show('call');
 
     clearInterval(state.tickTimer);
@@ -375,7 +357,9 @@
     if (sec > state.bestSec) state.bestSec = sec;
 
     var who = state.variant ? state.variant.name : 'fih';
-    goMissed(record ? 'Longest call yet' : 'Call Ended',
+    /* bestSec is still cached from startup, purely so a record can be detected
+       the moment the call ends. Nothing is shown during the call itself. */
+    goMissed(record ? 'New longest call' : 'Call Ended',
              who + ' — ' + clock(sec), 2600);   // he calls back. obviously.
   }
 

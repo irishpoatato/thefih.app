@@ -266,10 +266,11 @@ CSS filter or transform -- no extra artwork, nothing more to download.
 | fih? | nearly transparent | ~1 in 334 |
 | gold fih | sepia + saturated | ~1 in 1003 |
 
-Meeting one for the first time replaces the escalation line with "you have not
-seen this fih before", and the Recents sheet counts how many you have met. Only
-calls that actually ring count -- the screen painted behind the entry splash
-does not.
+Meeting one is recorded for the Recents count but never announced -- the line
+under the fih stays in its normal decline-count rotation, so a rare reads as
+something you noticed rather than something the site told you about. Only calls
+that actually ring count toward the collection; the screen painted behind the
+entry splash does not.
 
 `big fih` is capped at 1.14x deliberately: at 1.3x it runs off the side of a
 375px screen. Verified at 333px wide inside a 375px viewport, unclipped.
@@ -279,14 +280,12 @@ a thousand calls to check a filter is nobody's idea of an evening.
 
 ## longest call
 
-The in-call screen stays silent and motionless by design, so the challenge sits
-around it rather than inside it: the record to beat is written under the timer
-*before* the screen appears and never changes while the call runs, and beating
-it is announced on the call-ended notification instead of mid-call.
+The in-call screen stays silent and motionless by design, and shows nothing but
+the caller and the timer. The record lives entirely outside the call: beating it
+turns the call-ended notification into **New longest call**.
 
-`state.bestSec` is cached at startup so that line can be written synchronously.
-Reading it async would make text appear a tick into the call, which is exactly
-the thing the silent-call decision rules out.
+`state.bestSec` is cached at startup purely so a record can be detected the
+instant the call ends -- nothing is read or written during the call itself.
 
 ## the global counter
 
