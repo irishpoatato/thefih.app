@@ -484,3 +484,32 @@ body{
   .pad-ico svg{width:18px;height:18px;}
   .flavor{display:none;}
 }
+
+/* ─── mobile: the device already draws a status bar ───────────────────
+   Phones and tablets paint their own clock, signal and battery above the
+   page, so ours renders a second copy of the same information directly
+   under the real one. Hide it there and reclaim the space.
+
+   Detected by input type, not viewport width, on purpose: a narrow desktop
+   window has no system status bar of its own, so it should keep ours. A
+   touchscreen laptop reports hover:hover / pointer:fine for its primary
+   input and so keeps it too.
+
+   env(safe-area-inset-top) stays in the padding below, so the notch is
+   still cleared when the page is launched from the home screen.
+
+   This block must stay LAST: @media (max-height:560px) also sets
+   --statusbar, and with equal specificity the later rule is the one that
+   wins on a landscape phone. */
+
+@media (hover: none) and (pointer: coarse) {
+  :root{ --statusbar:0px; }
+  .statusbar{ display:none; }
+}
+
+/* Landscape phones set .caller{margin-top:4px} on the assumption that the
+   status bar above it is providing the breathing room. With the bar gone the
+   name sits flush against the top edge, so give it back a little. */
+@media (hover: none) and (pointer: coarse) and (max-height: 560px) {
+  .caller{ margin-top:12px; }
+}
