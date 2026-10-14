@@ -4,7 +4,7 @@
     {
       "name": "fih",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8123", "--directory", "public"],
+      "runtimeArgs": ["dev/serve.py", "8123"],
       "port": 8123
     }
   ]

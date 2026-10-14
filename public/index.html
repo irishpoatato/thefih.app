@@ -227,12 +227,18 @@
 
   <p id="toast" class="toast" hidden></p>
 
-  <!-- ─────────── first-tap catcher (only if the browser blocks audio) ───────────
-       Invisible. Absorbs exactly one tap anywhere on the screen, uses it to
-       start the ringtone, then gets out of the way. It has to swallow the
-       click as well as the pointerdown, or the same tap would fall through to
-       Accept/Decline underneath. -->
-  <div id="tap-catcher" class="tap-catcher" hidden></div>
+  <!-- ─────────── entry splash ───────────
+       Browsers will not make a sound until the user has interacted, so rather
+       than hiding that requirement behind an invisible tap-catcher, this makes
+       it the opening beat: a question, and a button that answers it. The tap
+       the browser demands is now one the visitor meant to make.
+
+       It also buys time — call_sound.mp3 finishes decoding while this is up,
+       so the first ring fires instantly with no synth bridge. -->
+  <div id="splash" class="splash">
+    <h1 class="splash-title">fih?</h1>
+    <button id="splash-enter" class="splash-btn" type="button" autofocus>fih.</button>
+  </div>
 
   <!-- ─────────── lock gate (kept behind USE_LOCK_GATE, currently off) ─────────── -->
   <div id="gate" class="gate" hidden>

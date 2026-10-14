@@ -396,18 +396,55 @@ body{
 }
 .toast[hidden]{display:none;}
 
-/* ─── first-tap catcher ──────────────────────────────────────
-   Fully transparent, but still hit-tests, so it collects the one gesture the
-   browser needs before it will make a sound. Sits above the call screen and
-   below the lock gate. */
+/* ─── entry splash ───────────────────────────────────────────
+   The one interaction the browser requires before it will play audio, turned
+   into the opening beat. Pure white against the black call screen behind it,
+   so dismissing it reads as the phone lighting up. */
 
-.tap-catcher{
+.splash{
   position:absolute;
   inset:0;
-  z-index:55;
-  background:transparent;
+  z-index:70;                    /* above every screen, bar and sheet */
+  background:#fff;
+  color:#0a0a0a;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:clamp(26px, 6vh, 54px);
+  padding:24px;
+  transition:opacity .28s ease;
 }
-.tap-catcher[hidden]{display:none;}
+.splash[hidden]{display:none;}
+.splash.leaving{opacity:0;}
+
+.splash-title{
+  margin:0;
+  font-size:clamp(84px, 26vw, 190px);
+  font-weight:400;
+  line-height:.9;
+  letter-spacing:-.04em;
+}
+
+.splash-btn{
+  appearance:none;
+  border:0;
+  cursor:pointer;
+  font-family:var(--sf);
+  font-size:clamp(20px, 5vw, 26px);
+  font-weight:500;
+  color:#fff;
+  background:#0a0a0a;
+  padding:16px clamp(40px, 12vw, 58px);
+  border-radius:999px;
+  transition:transform .12s ease, opacity .12s ease;
+}
+.splash-btn:active{transform:scale(.96);opacity:.85;}
+.splash-btn:focus-visible{outline:3px solid #0a0a0a;outline-offset:4px;}
+
+@media (prefers-reduced-motion:reduce){
+  .splash{transition:none;}
+}
 
 /* ─── lock gate (shown only if the browser blocks audio) ─── */
 

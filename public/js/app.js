@@ -46,26 +46,15 @@
     share:      $('btn-share'),
 
     toast:      $('toast'),
-    catcher:    $('tap-catcher'),
+    splash:     $('splash'),
+    splashBtn:  $('splash-enter'),
     gate:       $('gate')
   };
 
-  /* The iOS lock screen shown when the browser blocks autoplay: it turns the
-   * tap the browser demands into a ringing phone.
-   *
-   * Currently OFF — we land straight on the call, which is the joke. The cost
-   * is that a first-time visitor on a browser that blocks autoplay (most
-   * phones) probably misses ring one: the pointerdown retry at the bottom of
-   * this file unlocks audio on their first tap, and fih calls back within
-   * ~2.6s regardless.
-   *
-   * Set to true to bring the lock screen back. Nothing else needs to change. */
+  /* Legacy iOS lock screen, superseded by the entry splash — the splash now
+   * supplies the gesture browsers require, and does it visibly. Set this true
+   * to use the old lock screen instead; the splash is then skipped entirely. */
   var USE_LOCK_GATE = false;
-
-  /* Autoplay bugs in this app are invisible on a desktop that allows autoplay,
-   * which is how two of them shipped. Load with ?blocked=1 to force the
-   * autoplay-blocked path and see what a phone sees. */
-  var FORCE_BLOCKED = /[?&]blocked=1/.test(location.search);
 
   var state = {
     declines: 0,          // this session
@@ -396,35 +385,23 @@
     });
   }
 
-  /* Browsers will not make a sound until the user has interacted. Rather than
-   * asking for that interaction with a lock screen, put an invisible sheet over
-   * the live call screen and take the first tap wherever it lands.
+  /* The splash is the gesture. Browsers require one before they will play
+   * audio, so instead of hiding that behind an invisible tap-catcher -- which
+   * swallowed a tap the visitor had aimed at something else -- the button is
+   * the thing they came to press. One deliberate interaction, no dead taps.
    *
-   * It must swallow the click as well as the pointerdown: they come from the
-   * same tap, and if the click gets through, a tap aimed at Accept both starts
-   * the ringtone and immediately answers the call. Hence the linger before it
-   * hides — the pointerdown starts the audio at once, and the sheet stays put
-   * just long enough to absorb the click that follows it. */
-  function catcherOpen() {
-    el.catcher.hidden = false;
+   * unlock() is async: the ring has to wait for the AudioContext to actually
+   * reach 'running', or it rings into a suspended context and is silent. The
+   * fade starts immediately so the UI does not wait on it. */
+  function enterFromSplash() {
+    if (el.splash.hidden) return;
 
-    var done = false;
-    var swallow = function (e) { e.preventDefault(); e.stopPropagation(); };
-
-    var fire = function (e) {
-      if (done) return;
-      done = true;
-      swallow(e);
-      begin();                       // unlock, then ring
-      setTimeout(function () { el.catcher.hidden = true; }, 400);
-    };
-
-    el.catcher.addEventListener('pointerdown', fire);
-    el.catcher.addEventListener('click', swallow);
-    document.addEventListener('keydown', function onKey(e) {
-      document.removeEventListener('keydown', onKey);
-      fire(e);
+    window.FihSound.unlock().then(function () {
+      if (state.phase === 'incoming') startIncoming();
     });
+
+    el.splash.classList.add('leaving');
+    setTimeout(function () { el.splash.hidden = true; }, 300);
   }
 
   function gateOpen() {
@@ -443,15 +420,18 @@
   show('incoming');
   renderIncoming();
 
-  window.FihSound.prime();          // fetch + decode the ringtone up front
+  // Decode the ringtone while the splash is up, so the first ring is instant.
+  window.FihSound.prime();
 
-  window.FihSound.tryAuto().then(function (ok) {
-    if (ok && !FORCE_BLOCKED) { begin(); return; }   // autoplay allowed: it just rings
-    if (USE_LOCK_GATE) { gateOpen(); return; } // blocked: one tap on a lock screen
-    catcherOpen();                             // blocked: take the first tap invisibly
-  });
+  el.splashBtn.addEventListener('click', enterFromSplash);
+
+  if (USE_LOCK_GATE) {              // legacy alternative, off by default
+    el.splash.hidden = true;
+    window.FihSound.tryAuto().then(function (ok) { ok ? begin() : gateOpen(); });
+  }
 
   document.addEventListener('pointerdown', function retry() {
+    if (!el.splash.hidden) return;                 // the splash button owns the first gesture
     if (window.FihSound.isUnlocked) { document.removeEventListener('pointerdown', retry); return; }
     window.FihSound.unlock().then(function (ok) {
       if (ok && state.phase === 'incoming') startIncoming();
@@ -461,7 +441,7 @@
   // do not ring into an empty room
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) stopIncoming();
-    else if (state.phase === 'incoming' && el.gate.hidden) startIncoming();
+    else if (state.phase === 'incoming' && el.gate.hidden && el.splash.hidden) startIncoming();
   });
 
 })();
