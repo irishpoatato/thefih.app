@@ -117,17 +117,22 @@
      thousand times to check a filter is not a good use of anyone's evening. */
 
   var VARIANTS = [
-    { id: 'fih',     name: 'fih',                  cls: '',          weight: 880 },
-    { id: 'hif',     name: 'hif',                  cls: 'v-hif',     weight: 35  },
-    { id: 'big',     name: 'big fih',              cls: 'v-big',     weight: 25  },
-    { id: 'smol',    name: 'smol fih',             cls: 'v-smol',    weight: 25  },
-    { id: 'old',     name: 'old fih',              cls: 'v-old',     weight: 15  },
-    { id: 'shout',   name: 'FIH',                  cls: 'v-shout',   weight: 10  },
-    { id: 'blue',    name: 'blue fih',             cls: 'v-blue',    weight: 5   },
-    { id: 'unknown', name: 'fih (unknown number)', cls: 'v-unknown', weight: 4   },
-    { id: 'ghost',   name: 'fih?',                 cls: 'v-ghost',   weight: 3   },
-    { id: 'gold',    name: 'gold fih',             cls: 'v-gold',    weight: 1   }
+    { id: 'fih',     name: 'fih',             cls: '',          weight: 897 },
+    { id: 'hif',     name: 'hif',             cls: 'v-hif',     weight: 20  },  /* 1 in 50 */
+    { id: 'big',     name: 'big fih',         cls: 'v-big',     weight: 20  },  /* 1 in 50 */
+    { id: 'smol',    name: 'smol fih',        cls: 'v-smol',    weight: 20  },  /* 1 in 50 */
+    { id: 'old',     name: 'old fih',         cls: 'v-old',     weight: 20  },  /* 1 in 50 */
+    { id: 'shout',   name: 'FIH',             cls: 'v-shout',   weight: 10  },
+    { id: 'blue',    name: 'blue fih',        cls: 'v-blue',    weight: 5   },
+    { id: 'unknown', name: 'unknown number',  cls: 'v-unknown', weight: 4   },
+    { id: 'ghost',   name: 'fih?',            cls: 'v-ghost',   weight: 3   },
+    { id: 'gold',    name: 'gold fih',        cls: 'v-gold',    weight: 1   }
   ];
+
+  /* Nothing unusual until the premise has had time to land. The first five
+     calls are always plain fih, so a first-time visitor meets the joke before
+     it starts varying -- a rare on call one reads as noise, not a surprise. */
+  var VARIANTS_AFTER = 5;
 
   var FORCED = (function () {
     var m = /[?&]fih=([a-z]+)/.exec(location.search);
@@ -137,7 +142,9 @@
   })();
 
   function rollVariant() {
-    if (FORCED) return FORCED;
+    if (FORCED) return FORCED;                         // ?fih= ignores the gate
+    if (state.declines < VARIANTS_AFTER) return VARIANTS[0];
+
     var total = 0, i;
     for (i = 0; i < VARIANTS.length; i++) total += VARIANTS[i].weight;
     var n = Math.random() * total;

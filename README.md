@@ -256,24 +256,28 @@ CSS filter or transform -- no extra artwork, nothing more to download.
 
 | variant | look | odds |
 |---|---|---|
-| fih | plain | 87.7% |
-| hif | mirrored | ~1 in 29 |
-| big fih / smol fih | scaled | ~1 in 40 each |
-| old fih | sepia, desaturated | ~1 in 67 |
-| FIH | blown-out contrast | ~1 in 100 |
-| blue fih | hue-rotated | ~1 in 201 |
-| fih (unknown number) | greyscale, blurred | ~1 in 251 |
-| fih? | nearly transparent | ~1 in 334 |
-| gold fih | sepia + saturated | ~1 in 1003 |
+| fih | plain | 89.7% |
+| hif | mirrored | 1 in 50 |
+| big fih | 2.3x, runs off both sides | 1 in 50 |
+| smol fih | scaled down | 1 in 50 |
+| old fih | sepia, desaturated | 1 in 50 |
+| FIH | blown-out contrast | 1 in 100 |
+| blue fih | hue-rotated | 1 in 200 |
+| unknown number | greyscale, blurred | 1 in 250 |
+| fih? | fully transparent -- there is no fih | 1 in 333 |
+| gold fih | sepia + saturated | 1 in 1000 |
 
-Meeting one is recorded for the Recents count but never announced -- the line
-under the fih stays in its normal decline-count rotation, so a rare reads as
-something you noticed rather than something the site told you about. Only calls
-that actually ring count toward the collection; the screen painted behind the
-entry splash does not.
+**The first five calls are always plain fih** (`VARIANTS_AFTER`). A rare on call
+one reads as noise rather than a surprise, so the premise lands first. `?fih=`
+ignores the gate.
 
-`big fih` is capped at 1.14x deliberately: at 1.3x it runs off the side of a
-375px screen. Verified at 333px wide inside a 375px viewport, unclipped.
+`big fih` is `translateY(-70%) scale(2.3)`. Scale alone caps out at 1.25x --
+there is only 60px between the fish and the flavor line below it, against 209px
+of empty space above -- so it shifts up into that space before scaling.
+translateY is a percentage of the element's own box, so it shrinks with the art
+on short screens. Measured at 673px wide on a 375px viewport: off both sides by
+design, still clearing the subtitle above by 53px and the flavor line below by
+22px, with no page overflow.
 
 **Load `?fih=<id>` to force one** -- `?fih=gold`, `?fih=hif`, and so on. Rolling
 a thousand calls to check a filter is nobody's idea of an evening.
