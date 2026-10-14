@@ -115,6 +115,32 @@
     return buf;
   }
 
+  /* iOS sorts audio into two sessions: "ambient" (keyboard clicks, game
+     effects) which the hardware ring/silent switch mutes, and "playback"
+     (music, podcasts, video) which it does not. Web Audio lands in ambient by
+     default, so a phone on silent hears nothing at all -- which, for a site
+     whose entire point is a ringtone, is the whole thing defeated.
+
+     Claiming the playback session is the supported way to ring anyway
+     (iOS 17+). Everywhere else the property simply does not exist and this is
+     a no-op, so there is nothing to feature-detect beyond its presence.
+
+     Accepted trade-off: the playback session interrupts whatever else the
+     phone was playing, exactly as opening a video does. Someone's podcast
+     stops. That is the cost of ringing through silent mode, and the entry
+     splash is what justifies it -- nobody arrives here by accident.
+
+     Reported to be unreliable on some iOS 18 builds, where the property
+     accepts 'playback' but Web Audio stays muted anyway. It degrades to
+     today's behaviour when that happens, so it is still worth setting. */
+  function claimPlaybackSession() {
+    try {
+      if (global.navigator && global.navigator.audioSession) {
+        global.navigator.audioSession.type = 'playback';
+      }
+    } catch (e) { /* unsupported or refused -- ambient still works */ }
+  }
+
   function ensure() {
     if (!ctx) {
       var AC = global.AudioContext || global.webkitAudioContext;
@@ -137,6 +163,7 @@
       conv.connect(master);
 
       decodeIfNeeded();
+      claimPlaybackSession();
     }
     if (ctx.state === 'suspended') ctx.resume();
     return ctx;
@@ -278,6 +305,7 @@
     unlock: function () {
       var c = ensure();
       if (!c) return Promise.resolve(false);
+      claimPlaybackSession();          // set it on the gesture, not just at init
       return c.resume().then(function () {
         unlocked = (c.state === 'running');
         return unlocked;
@@ -301,7 +329,9 @@
         decodeFailed: decodeFailed,
         contextState: ctx ? ctx.state : 'none',
         ringPeak: +ringPeak.toFixed(4),      // how loud the source file actually is
-        ringGain: +ringGain.toFixed(2)       // makeup applied to reach a usable level
+        ringGain: +ringGain.toFixed(2),      // makeup applied to reach a usable level
+        audioSession: (global.navigator && global.navigator.audioSession)
+          ? global.navigator.audioSession.type : 'unsupported'
       };
     },
 
