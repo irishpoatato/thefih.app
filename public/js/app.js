@@ -36,6 +36,7 @@
     hangup:     $('btn-hangup'),
 
     timer:      $('timer'),
+    callName:   $('call-name'),
 
     replies:    $('replies'),
     repliesCancel: $('replies-cancel'),
@@ -62,7 +63,9 @@
     callStart: 0,
     tickTimer: null,
     backTimer: null,
-    toastTimer: null
+    toastTimer: null,
+    variant: null,
+    bestSec: 0        // cached so the in-call best can be written synchronously
   };
 
   /* ── copy ───────────────────────────────────────────────────────── */
@@ -100,6 +103,67 @@
   var DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var MONTHS = ['January','February','March','April','May','June','July','August',
                 'September','October','November','December'];
+
+
+  /* ── rare fih ──────────────────────────────────────────────────────
+     Each call rolls one. Every variant is the same fih.png under a CSS filter
+     or transform -- no extra artwork and nothing more to download.
+
+     Weights are out of 1003, so plain fih lands ~88% of the time and gold is
+     about 1 in 1000. Rare enough that meeting one feels like something; the
+     Recents sheet tracks which you have met.
+
+     Load with ?fih=<id> to force one (e.g. ?fih=gold) -- rolling for gold a
+     thousand times to check a filter is not a good use of anyone's evening. */
+
+  var VARIANTS = [
+    { id: 'fih',     name: 'fih',             cls: '',          weight: 897 },
+    { id: 'hif',     name: 'hif',             cls: 'v-hif',     weight: 20  },  /* 1 in 50 */
+    { id: 'big',     name: 'big fih',         cls: 'v-big',     weight: 20  },  /* 1 in 50 */
+    { id: 'smol',    name: 'smol fih',        cls: 'v-smol',    weight: 20  },  /* 1 in 50 */
+    { id: 'old',     name: 'old fih',         cls: 'v-old',     weight: 20  },  /* 1 in 50 */
+    { id: 'shout',   name: 'FIH',             cls: 'v-shout',   weight: 10  },
+    { id: 'blue',    name: 'blue fih',        cls: 'v-blue',    weight: 5   },
+    { id: 'unknown', name: 'unknown number',  cls: 'v-unknown', weight: 4   },
+    { id: 'ghost',   name: 'fih?',            cls: 'v-ghost',   weight: 3   },
+    { id: 'gold',    name: 'gold fih',        cls: 'v-gold',    weight: 1   }
+  ];
+
+  /* Nothing unusual until the premise has had time to land. The first five
+     calls are always plain fih, so a first-time visitor meets the joke before
+     it starts varying -- a rare on call one reads as noise, not a surprise. */
+  var VARIANTS_AFTER = 5;
+
+  var FORCED = (function () {
+    var m = /[?&]fih=([a-z]+)/.exec(location.search);
+    if (!m) return null;
+    for (var i = 0; i < VARIANTS.length; i++) if (VARIANTS[i].id === m[1]) return VARIANTS[i];
+    return null;
+  })();
+
+  function rollVariant() {
+    if (FORCED) return FORCED;                         // ?fih= ignores the gate
+    if (state.declines < VARIANTS_AFTER) return VARIANTS[0];
+
+    var total = 0, i;
+    for (i = 0; i < VARIANTS.length; i++) total += VARIANTS[i].weight;
+    var n = Math.random() * total;
+    for (i = 0; i < VARIANTS.length; i++) {
+      n -= VARIANTS[i].weight;
+      if (n <= 0) return VARIANTS[i];
+    }
+    return VARIANTS[0];
+  }
+
+  var VARIANT_CLASSES = VARIANTS.map(function (v) { return v.cls; })
+                                .filter(function (c) { return c; });
+
+  function paintVariant(v) {
+    Array.prototype.forEach.call(document.querySelectorAll('.fih-art'), function (img) {
+      for (var i = 0; i < VARIANT_CLASSES.length; i++) img.classList.remove(VARIANT_CLASSES[i]);
+      if (v.cls) img.classList.add(v.cls);
+    });
+  }
 
   /* ── helpers ────────────────────────────────────────────────────── */
 
@@ -146,10 +210,13 @@
 
   /* ── incoming ───────────────────────────────────────────────────── */
 
-  function renderIncoming() {
+  function renderIncoming(announce) {
     var d = state.declines;
+    var v = rollVariant();
+    state.variant = v;
+    paintVariant(v);
 
-    el.callerName.textContent = 'fih';
+    el.callerName.textContent = v.name;
     el.callerSub.textContent =
       d === 0 ? 'calling...' :
       d < 4   ? 'calling...' :
@@ -158,12 +225,16 @@
 
     el.flavor.textContent = d < FLAVOR.length ? FLAVOR[d] : pick(LATE_FLAVOR);
 
+    // meeting one is recorded for the Recents count, but never announced --
+    // the flavor line stays in its normal rotation
+    if (announce && v.id !== 'fih') window.FihCounter.markSeen(v.id);
+
     if (d >= 6) makeSlippery();
   }
 
   function startIncoming() {
     show('incoming');
-    renderIncoming();
+    renderIncoming(true);        // a call that actually rings: this one counts
     window.FihSound.startRing();
   }
 
@@ -265,6 +336,9 @@
     el.decline.style.transform = '';
     state.callStart = Date.now();
     el.timer.textContent = '00:00';
+
+    if (state.variant) el.callName.textContent = state.variant.name;
+
     show('call');
 
     clearInterval(state.tickTimer);
@@ -286,7 +360,14 @@
     window.FihCounter.bump('talktime', sec);
     window.FihCounter.best('longest', sec);
 
-    goMissed('Call Ended', 'fih — ' + clock(sec), 2600);   // he calls back. obviously.
+    var record = sec > state.bestSec && sec > 0;
+    if (sec > state.bestSec) state.bestSec = sec;
+
+    var who = state.variant ? state.variant.name : 'fih';
+    /* bestSec is still cached from startup, purely so a record can be detected
+       the moment the call ends. Nothing is shown during the call itself. */
+    goMissed(record ? 'New longest call' : 'Call Ended',
+             who + ' — ' + clock(sec), 2600);   // he calls back. obviously.
   }
 
   /* ── call log ───────────────────────────────────────────────────── */
@@ -302,6 +383,9 @@
         $('s-total').textContent    = clock(s.talktime);
         $('s-global').textContent   = (g == null) ? '—' : g.toLocaleString();
         el.sheet.hidden = false;
+      });
+    window.FihCounter.seen().then(function (ids) {
+      $('s-seen').textContent = ids.length + ' / ' + (VARIANTS.length - 1);
       });
   }
 
@@ -418,7 +502,9 @@
   paintTime();
   setInterval(paintTime, 10000);
   show('incoming');
-  renderIncoming();
+  renderIncoming(false);         // painted behind the splash; no fih met yet
+
+  window.FihCounter.local().then(function (st) { state.bestSec = st.longest || 0; });
 
   // Decode the ringtone while the splash is up, so the first ring is instant.
   window.FihSound.prime();

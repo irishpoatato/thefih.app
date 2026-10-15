@@ -550,3 +550,26 @@ body{
 @media (hover: none) and (pointer: coarse) and (max-height: 560px) {
   .caller{ margin-top:12px; }
 }
+
+/* ─── rare fih ───────────────────────────────────────────────────────
+   Every variant is the same single fih.png put through a filter or a
+   transform. No new artwork, nothing extra to download, and the rarest ones
+   are still just CSS. Weights live in app.js. */
+
+.fih-art{
+  transition:filter .25s ease, transform .25s ease, opacity .25s ease;
+}
+
+.v-hif     { transform:scaleX(-1); }                /* facing the wrong way */
+.v-big     { transform:translateY(-70%) scale(2.3); }   /* runs off both sides, deliberately */
+.v-smol    { transform:scale(.56); }
+.v-old     { filter:sepia(.75) saturate(.5) contrast(.95) brightness(.95); }
+.v-shout   { filter:contrast(1.9) brightness(1.25) saturate(1.3); }
+.v-blue    { filter:hue-rotate(165deg) saturate(1.5); }
+.v-unknown { filter:grayscale(1) blur(4px) brightness(.8); }
+.v-ghost   { opacity:0; }                               /* there is no fih */
+.v-gold    { filter:sepia(1) saturate(5) hue-rotate(-12deg) brightness(1.08); }
+
+@media (prefers-reduced-motion:reduce){
+  .fih-art{transition:none;}
+}

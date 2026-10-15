@@ -249,6 +249,48 @@ without it.
 The script 404s during local development, which is expected and harmless; the
 site is unaffected.
 
+## rare fih (prototype)
+
+Every incoming call rolls a variant. All of them are the same `fih.png` under a
+CSS filter or transform -- no extra artwork, nothing more to download.
+
+| variant | look | odds |
+|---|---|---|
+| fih | plain | 89.7% |
+| hif | mirrored | 1 in 50 |
+| big fih | 2.3x, runs off both sides | 1 in 50 |
+| smol fih | scaled down | 1 in 50 |
+| old fih | sepia, desaturated | 1 in 50 |
+| FIH | blown-out contrast | 1 in 100 |
+| blue fih | hue-rotated | 1 in 200 |
+| unknown number | greyscale, blurred | 1 in 250 |
+| fih? | fully transparent -- there is no fih | 1 in 333 |
+| gold fih | sepia + saturated | 1 in 1000 |
+
+**The first five calls are always plain fih** (`VARIANTS_AFTER`). A rare on call
+one reads as noise rather than a surprise, so the premise lands first. `?fih=`
+ignores the gate.
+
+`big fih` is `translateY(-70%) scale(2.3)`. Scale alone caps out at 1.25x --
+there is only 60px between the fish and the flavor line below it, against 209px
+of empty space above -- so it shifts up into that space before scaling.
+translateY is a percentage of the element's own box, so it shrinks with the art
+on short screens. Measured at 673px wide on a 375px viewport: off both sides by
+design, still clearing the subtitle above by 53px and the flavor line below by
+22px, with no page overflow.
+
+**Load `?fih=<id>` to force one** -- `?fih=gold`, `?fih=hif`, and so on. Rolling
+a thousand calls to check a filter is nobody's idea of an evening.
+
+## longest call
+
+The in-call screen stays silent and motionless by design, and shows nothing but
+the caller and the timer. The record lives entirely outside the call: beating it
+turns the call-ended notification into **New longest call**.
+
+`state.bestSec` is cached at startup purely so a record can be detected the
+instant the call ends -- nothing is read or written during the call itself.
+
 ## the global counter
 
 `js/counter.js` is currently `LocalStore` — `localStorage`, single browser. It
