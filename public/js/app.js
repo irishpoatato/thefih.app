@@ -64,6 +64,7 @@
     tickTimer: null,
     backTimer: null,
     toastTimer: null,
+    calls: 0,         // calls that have actually rung this session
     variant: null,
     bestSec: 0        // cached so the in-call best can be written synchronously
   };
@@ -131,7 +132,11 @@
 
   /* Nothing unusual until the premise has had time to land. The first five
      calls are always plain fih, so a first-time visitor meets the joke before
-     it starts varying -- a rare on call one reads as noise, not a surprise. */
+     it starts varying -- a rare on call one reads as noise, not a surprise.
+
+     Counted in calls that RANG, not calls declined. Keying this to declines
+     meant anyone who answered and hung up never advanced the counter, so the
+     gate never opened however many calls they took. */
   var VARIANTS_AFTER = 5;
 
   var FORCED = (function () {
@@ -143,7 +148,7 @@
 
   function rollVariant() {
     if (FORCED) return FORCED;                         // ?fih= ignores the gate
-    if (state.declines < VARIANTS_AFTER) return VARIANTS[0];
+    if (state.calls <= VARIANTS_AFTER) return VARIANTS[0];
 
     var total = 0, i;
     for (i = 0; i < VARIANTS.length; i++) total += VARIANTS[i].weight;
@@ -232,6 +237,13 @@
     if (d >= 6) makeSlippery();
   }
 
+  /* A new call. startIncoming() on its own just resumes ringing (coming back
+     to the tab, say) and must not count as another call. */
+  function newCall() {
+    state.calls += 1;
+    startIncoming();
+  }
+
   function startIncoming() {
     show('incoming');
     renderIncoming(true);        // a call that actually rings: this one counts
@@ -248,7 +260,7 @@
     paintTime();
     show('missed');
     clearTimeout(state.backTimer);
-    state.backTimer = setTimeout(startIncoming, wait);
+    state.backTimer = setTimeout(newCall, wait);
   }
 
   function onDecline() {
@@ -465,7 +477,7 @@
     // unlock() is async: starting the ring before it settles rings into a
     // still-suspended context, which is silent
     window.FihSound.unlock().then(function () {
-      if (state.phase === 'incoming') startIncoming();
+      if (state.phase === 'incoming') newCall();
     });
   }
 
@@ -481,7 +493,7 @@
     if (el.splash.hidden) return;
 
     window.FihSound.unlock().then(function () {
-      if (state.phase === 'incoming') startIncoming();
+      if (state.phase === 'incoming') newCall();
     });
 
     el.splash.classList.add('leaving');
@@ -520,7 +532,7 @@
     if (!el.splash.hidden) return;                 // the splash button owns the first gesture
     if (window.FihSound.isUnlocked) { document.removeEventListener('pointerdown', retry); return; }
     window.FihSound.unlock().then(function (ok) {
-      if (ok && state.phase === 'incoming') startIncoming();
+      if (ok && state.phase === 'incoming') newCall();
     });
   });
 
