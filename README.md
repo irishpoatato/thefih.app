@@ -84,6 +84,17 @@ Cache headers deliberately revalidate rather than using long `immutable` times,
 because the filenames are **not** content-hashed — a long cache would strand
 visitors on a version you cannot patch.
 
+`/css/*` and `/js/*` are `max-age=0, must-revalidate`, matching the HTML. They
+were `max-age=600`, and that ten-minute window is not harmless: the HTML is
+always fresh but points at an unversioned `js/app.js`, so a returning browser
+can run **new markup against old JavaScript** for ten minutes after a deploy,
+with nothing on screen to say so. That is long enough to test a feature that is
+not in the bundle you are running and conclude it is broken — it cost a
+200-call test of the rare fih variants, and a separate debugging session where
+a splash appeared to ring behind itself. Each file now costs one conditional
+request per load, answered 304, which on a site this size is nothing next to
+testing against a build you cannot see.
+
 ## layout
 
 ```
