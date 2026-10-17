@@ -267,16 +267,24 @@ CSS filter or transform -- no extra artwork, nothing more to download.
 
 | variant | look | odds |
 |---|---|---|
-| fih | plain | 89.7% |
+| fih | plain | 92.2% |
 | hif | mirrored | 1 in 50 |
 | big fih | 2.3x, runs off both sides | 1 in 50 |
 | smol fih | scaled down | 1 in 50 |
-| old fih | sepia, desaturated | 1 in 50 |
 | FIH | blown-out contrast | 1 in 100 |
-| blue fih | hue-rotated | 1 in 200 |
 | unknown number | greyscale, blurred | 1 in 250 |
 | fih? | fully transparent -- there is no fih | 1 in 333 |
 | gold fih | sepia + saturated | 1 in 1000 |
+
+`old fih` and `blue fih` were retired. Their ids may still sit in a returning
+visitor's `fih.seen.v1`, so the Recents tally counts only variants that still
+exist -- otherwise someone who had met all nine would read "9 / 7".
+
+The roll happens in `newCall()`, not in `renderIncoming()`. The caller is a
+property of the call: re-rendering the same call must not change who is on the
+line. When the roll lived in the render, returning to a backgrounded tab
+re-rolled the caller mid-ring and handed out fresh chances at a rare without
+taking a call.
 
 **The first five calls are always plain fih** (`VARIANTS_AFTER`). A rare on call
 one reads as noise rather than a surprise, so the premise lands first. `?fih=`

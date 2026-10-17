@@ -118,13 +118,11 @@
      thousand times to check a filter is not a good use of anyone's evening. */
 
   var VARIANTS = [
-    { id: 'fih',     name: 'fih',             cls: '',          weight: 897 },
+    { id: 'fih',     name: 'fih',             cls: '',          weight: 922 },
     { id: 'hif',     name: 'hif',             cls: 'v-hif',     weight: 20  },  /* 1 in 50 */
     { id: 'big',     name: 'big fih',         cls: 'v-big',     weight: 20  },  /* 1 in 50 */
     { id: 'smol',    name: 'smol fih',        cls: 'v-smol',    weight: 20  },  /* 1 in 50 */
-    { id: 'old',     name: 'old fih',         cls: 'v-old',     weight: 20  },  /* 1 in 50 */
     { id: 'shout',   name: 'FIH',             cls: 'v-shout',   weight: 10  },
-    { id: 'blue',    name: 'blue fih',        cls: 'v-blue',    weight: 5   },
     { id: 'unknown', name: 'unknown number',  cls: 'v-unknown', weight: 4   },
     { id: 'ghost',   name: 'fih?',            cls: 'v-ghost',   weight: 3   },
     { id: 'gold',    name: 'gold fih',        cls: 'v-gold',    weight: 1   }
@@ -215,10 +213,9 @@
 
   /* ── incoming ───────────────────────────────────────────────────── */
 
-  function renderIncoming(announce) {
+  function renderIncoming() {
     var d = state.declines;
-    var v = rollVariant();
-    state.variant = v;
+    var v = state.variant || VARIANTS[0];
     paintVariant(v);
 
     el.callerName.textContent = v.name;
@@ -230,10 +227,6 @@
 
     el.flavor.textContent = d < FLAVOR.length ? FLAVOR[d] : pick(LATE_FLAVOR);
 
-    // meeting one is recorded for the Recents count, but never announced --
-    // the flavor line stays in its normal rotation
-    if (announce && v.id !== 'fih') window.FihCounter.markSeen(v.id);
-
     if (d >= 6) makeSlippery();
   }
 
@@ -241,12 +234,19 @@
      to the tab, say) and must not count as another call. */
   function newCall() {
     state.calls += 1;
+
+    /* Roll here, not in renderIncoming: the caller is a property of the call,
+       so re-rendering the same call (returning to the tab, say) must not
+       change who is on the line, nor hand out another chance at a rare. */
+    state.variant = rollVariant();
+    if (state.variant.id !== 'fih') window.FihCounter.markSeen(state.variant.id);
+
     startIncoming();
   }
 
   function startIncoming() {
     show('incoming');
-    renderIncoming(true);        // a call that actually rings: this one counts
+    renderIncoming();
     window.FihSound.startRing();
   }
 
@@ -397,7 +397,13 @@
         el.sheet.hidden = false;
       });
     window.FihCounter.seen().then(function (ids) {
-      $('s-seen').textContent = ids.length + ' / ' + (VARIANTS.length - 1);
+      /* ids from retired variants are still in storage; count only the ones
+         that still exist, or someone who met all nine would read "9 / 7" */
+      var live = ids.filter(function (id) {
+        for (var i = 0; i < VARIANTS.length; i++) if (VARIANTS[i].id === id) return true;
+        return false;
+      });
+      $('s-seen').textContent = live.length + ' / ' + (VARIANTS.length - 1);
       });
   }
 
@@ -470,6 +476,15 @@
   });
   el.share.addEventListener('click', shareStats);
 
+  /* Escape closes whatever overlay is open. Both sheets were dismissible only
+     by finding and clicking their own button -- never a trap, since that
+     button is reachable, but Escape is what a keyboard user reaches for. */
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' && e.keyCode !== 27) return;
+    if (!el.replies.hidden) { el.replies.hidden = true; return; }
+    if (!el.sheet.hidden)   { el.sheet.hidden = true; }
+  });
+
   /* ── audio: automatic if the browser allows, one tap if it does not ── */
 
   function begin() {
@@ -489,8 +504,11 @@
    * unlock() is async: the ring has to wait for the AudioContext to actually
    * reach 'running', or it rings into a suspended context and is silent. The
    * fade starts immediately so the UI does not wait on it. */
+  var entered = false;
+
   function enterFromSplash() {
-    if (el.splash.hidden) return;
+    if (entered) return;          // the fade leaves it clickable for 300ms
+    entered = true;
 
     window.FihSound.unlock().then(function () {
       if (state.phase === 'incoming') newCall();
@@ -514,7 +532,7 @@
   paintTime();
   setInterval(paintTime, 10000);
   show('incoming');
-  renderIncoming(false);         // painted behind the splash; no fih met yet
+  renderIncoming();              // painted behind the splash; plain by default
 
   window.FihCounter.local().then(function (st) { state.bestSec = st.longest || 0; });
 
