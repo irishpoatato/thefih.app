@@ -280,6 +280,12 @@ CSS filter or transform -- no extra artwork, nothing more to download.
 visitor's `fih.seen.v1`, so the Recents tally counts only variants that still
 exist -- otherwise someone who had met all nine would read "9 / 7".
 
+A call is immutable once it starts. Both the variant and the flavor line are
+chosen in `newCall()`, and returning to a backgrounded tab resumes the ringtone
+without re-rendering. Anything random that lives in the render changes every
+time the screen is rebuilt -- that is how tabbing away and back used to re-roll
+the caller, and how the line underneath it kept changing afterwards.
+
 The roll happens in `newCall()`, not in `renderIncoming()`. The caller is a
 property of the call: re-rendering the same call must not change who is on the
 line. When the roll lived in the render, returning to a backgrounded tab

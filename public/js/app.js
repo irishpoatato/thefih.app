@@ -66,6 +66,7 @@
     toastTimer: null,
     calls: 0,         // calls that have actually rung this session
     variant: null,
+    flavor: '',       // chosen once per call, like the variant
     bestSec: 0        // cached so the in-call best can be written synchronously
   };
 
@@ -225,7 +226,7 @@
       d < 9   ? 'calling... (' + d + ')' :
                 'still calling...';
 
-    el.flavor.textContent = d < FLAVOR.length ? FLAVOR[d] : pick(LATE_FLAVOR);
+    el.flavor.textContent = state.flavor || '';
 
     if (d >= 6) makeSlippery();
   }
@@ -240,6 +241,13 @@
        change who is on the line, nor hand out another chance at a rare. */
     state.variant = rollVariant();
     if (state.variant.id !== 'fih') window.FihCounter.markSeen(state.variant.id);
+
+    /* Same reasoning as the variant: past FLAVOR.length the line is picked at
+       random, so leaving it in the render meant it changed on every re-render.
+       Choose it once, here. */
+    state.flavor = state.declines < FLAVOR.length
+      ? FLAVOR[state.declines]
+      : pick(LATE_FLAVOR);
 
     startIncoming();
   }
@@ -556,8 +564,13 @@
 
   // do not ring into an empty room
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) stopIncoming();
-    else if (state.phase === 'incoming' && el.gate.hidden && el.splash.hidden) startIncoming();
+    if (document.hidden) { stopIncoming(); return; }
+    /* Resume the ringtone only. Re-rendering rebuilt a call that was already
+       in progress -- which is how tabbing away and back used to re-roll the
+       caller, and still re-picked the line underneath it. */
+    if (state.phase === 'incoming' && el.gate.hidden && el.splash.hidden) {
+      window.FihSound.startRing();
+    }
   });
 
 })();
